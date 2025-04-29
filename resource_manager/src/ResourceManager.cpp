@@ -762,11 +762,13 @@ err:
 void ResourceManager::sendCrashSignal(int signal, pid_t pid, uid_t uid)
 {
     PAL_DBG(LOG_TAG, "%s: signal %d, pid %u, uid %u", __func__, signal, pid, uid);
+#ifndef PAL_MEMLOG_UNSUPPORTED
     int32_t ret = memLoggerDumpAllToFile();
     if (ret)
     {
         PAL_ERR(LOG_TAG, "Error in dumping queues: %d", ret);
     }
+#endif
     struct agm_dump_info dump_info = {signal, (uint32_t)pid, (uint32_t)uid};
     agm_dump(&dump_info);
 }
@@ -799,6 +801,7 @@ ResourceManager::ResourceManager()
     mHighestPriorityActiveStream = nullptr;
     mPriorityHighestPriorityActiveStream = 0;
 
+#ifndef PAL_MEMLOG_UNSUPPORTED
     ret = memLoggerInitQ(PAL_STATE_Q, MEMLOG_CFG_FILE); //initializes the queue for the debug logger
 
     if (ret) {
@@ -810,6 +813,7 @@ ResourceManager::ResourceManager()
     if (ret) {
         PAL_ERR(LOG_TAG, "error in initializing KPI queue %d", ret);
     }
+#endif
 
     ret = ResourceManager::XmlParser(SNDPARSER);
     if (ret) {
@@ -980,6 +984,7 @@ ResourceManager::ResourceManager()
 ResourceManager::~ResourceManager()
 {
     // Dump memory logger queues
+#ifndef PAL_MEMLOG_UNSUPPORTED
     int ret = memLoggerDumpAllToFile();
     if (ret)
     {
@@ -996,6 +1001,7 @@ ResourceManager::~ResourceManager()
     {
         PAL_ERR(LOG_TAG, "error in deinitializing KPI queue %d", ret);
     }
+#endif
 
     streamTag.clear();
     streamPpTag.clear();
